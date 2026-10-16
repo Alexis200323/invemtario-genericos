@@ -21,8 +21,6 @@ android.minapi = 24
 android.ndk = 25b
 android.accept_sdk_licenses = True
 android.archs = arm64-v8a, armeabi-v7a
-
-# Forzar build-tools estable
 android.sdk_build_tools = 34.0.0
 
 [buildozer]
