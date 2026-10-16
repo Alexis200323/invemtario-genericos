@@ -14,10 +14,18 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Build APK with official Buildozer Docker
-      uses: docker://kivy/buildozer:latest
-      with:
-        args: android debug
+    - name: Build APK
+      run: |
+        # Crear directorio de licencias y aceptarlas
+        mkdir -p \~/.android
+        echo "count=0" > \~/.android/repositories.cfg
+        
+        # Ejecutar Buildozer dentro del contenedor oficial
+        docker run --rm -v $PWD:/home/user/hostcwd \
+          -v $HOME/.buildozer:/home/user/.buildozer \
+          -e BUILDOZER_WARN_ON_ROOT=0 \
+          kivy/buildozer:latest \
+          android debug
 
     - name: Subir el APK
       uses: actions/upload-artifact@v4
