@@ -3,7 +3,7 @@ name: Compilar APK con Buildozer
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:   # permite ejecutarlo manualmente
+  workflow_dispatch:
 
 jobs:
   build:
