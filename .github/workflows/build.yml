@@ -24,7 +24,14 @@ jobs:
     - name: Instalar Buildozer y Cython
       run: |
         pip install --upgrade pip
-        pip install buildozer cython
+        pip install buildozer cython pypylon
+
+    - name: Forzar herramientas y licencias SDK 31
+      run: |
+        export ANDROID_HOME="/home/runner/.buildozer/android/platform/android-sdk"
+        mkdir -p $ANDROID_HOME
+        yes | sdkmanager --licenses || true
+        sdkmanager "build-tools;31.0.0" "platforms;android-31" || true
 
     - name: Compilar APK
       run: |
