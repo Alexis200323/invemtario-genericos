@@ -18,7 +18,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          git zip unzip openjdk-17-jdk \
+          git zip unzip openjdk-17-jdk wget \
           autoconf libtool pkg-config \
           zlib1g-dev libncurses5-dev libncursesw5-dev \
           libtinfo6 libffi-dev libssl-dev \
@@ -40,23 +40,49 @@ jobs:
         pip install --upgrade pip
         pip install buildozer cython==0.29.36
 
-    - name: Aceptar licencias Android y preparar SDK
+    - name: Preparar Android SDK + sdkmanager (solución del error)
       run: |
-        mkdir -p $HOME/.android
-        echo "count=0" > $HOME/.android/repositories.cfg
-        
-        # Crear carpeta de licencias y aceptarlas todas
-        mkdir -p $HOME/.buildozer/android/platform/android-sdk/licenses
-        echo -e "\n24333f8a63b6825ea9c5514f07c5092c9acbf6" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
-        echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
-        echo -e "\nd56f5187474654c3c5f1c1f6cd9f9a0f" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-googletv-license
-        echo -e "\n601085b94cd77f0b54ff86406957099ebe79c4d6" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-arm-dbt-license
-        echo -e "\n33b6a2b64607f11b759f320ef9dff4ae5c47d97a" > $HOME/.buildozer/android/platform/android-sdk/licenses/google-gdk-license
-        echo -e "\ne9acab5b5f8911bf9275bb238fc8df4a1cfbf4d" > $HOME/.buildozer/android/platform/android-sdk/licenses/mips-android-sysimage-license
+        # Crear estructura
+        mkdir -p $HOME/.buildozer/android/platform/android-sdk
+        cd $HOME/.buildozer/android/platform/android-sdk
+
+        # Descargar Command Line Tools actualizadas
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+        unzip -q cmdline-tools.zip
+        mkdir -p cmdline-tools
+        mv cmdline-tools cmdline-tools/latest 2>/dev/null || true
+        # Ajuste por si el unzip crea una carpeta diferente
+        if [ -d "cmdline-tools" ] && [ ! -d "cmdline-tools/latest" ]; then
+          mkdir -p cmdline-tools/latest
+          mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
+        fi
+
+        # Crear la ruta antigua que Buildozer espera
+        mkdir -p tools/bin
+
+        # Crear enlace simbólico para que Buildozer encuentre sdkmanager
+        ln -sf $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager tools/bin/sdkmanager
+        chmod +x tools/bin/sdkmanager
+
+        # Aceptar todas las licencias
+        yes | ./cmdline-tools/latest/bin/sdkmanager --licenses || true
+        yes | ./cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform/android-sdk --licenses || true
+
+        # Instalar los paquetes necesarios
+        ./cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform/android-sdk \
+          "platform-tools" \
+          "platforms;android-34" \
+          "build-tools;34.0.0" || true
+
+        # Crear licencias manualmente por si acaso
+        mkdir -p licenses
+        echo -e "\n24333f8a63b6825ea9c5514f07c5092c9acbf6" > licenses/android-sdk-license
+        echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > licenses/android-sdk-preview-license
 
     - name: Compilar APK
       run: |
-        yes | buildozer -v android debug || true
+        export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
+        export ANDROID_SDK_ROOT=$ANDROID_HOME
         buildozer -v android debug
 
     - name: Subir el APK generado
