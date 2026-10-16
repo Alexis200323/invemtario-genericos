@@ -1,43 +1,31 @@
 [app]
 
-# (str) Title of your application
 title = Inventario Genericos
-
-# (str) Package name
 package.name = inventariogenericos
-
-# (str) Package domain (needed for android packaging)
 package.domain = org.inventario
 
-# (str) Source code where the main.py live
 source.dir = .
+source.include_exts = py,png,jpg,kv,atlas,db
 
-# (list) Source files to include (python files and db)
-source.include_exts = py,db
-
-# (str) Application versioning
 version = 0.1
 
-# (list) Application requirements
-requirements = python3,sqlite3
+# Importante: kivy es obligatorio para tener interfaz gráfica
+requirements = python3,kivy,sqlite3
 
-# (str) Supported orientation
 orientation = portrait
-
-# (bool) Indicate if the application should be fullscreen or not
 fullscreen = 0
 
-# (list) Permissions
-android.permissions = INTERNET
+android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
 
-# (int) Target Android API, should be as high as possible.
-android.api = 33
-
-# (int) Minimum API required
-android.min_api = 21
-
-# (int) Android NDK version
-android.sdk_build_tools_version = 31.0.0
-Android.ndk = 23b
-# (bool) Accept SDK licenses automatically
+# Versiones actuales recomendadas
+android.api = 34
+android.minapi = 24
+android.ndk = 25b
 android.accept_sdk_licenses = True
+
+# Arquitecturas (recomendado)
+android.archs = arm64-v8a, armeabi-v7a
+
+[buildozer]
+log_level = 2
+warn_on_root = 1
