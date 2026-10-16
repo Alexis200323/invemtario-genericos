@@ -37,7 +37,7 @@ android.api = 33
 android.min_api = 21
 
 # (int) Android NDK version
-android.ndk = 25b
+android.sdk_build_tools_version = 33.0.2
 
 # (bool) Accept SDK licenses automatically
 android.accept_sdk_licenses = True
