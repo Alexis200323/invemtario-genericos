@@ -26,6 +26,12 @@ jobs:
         pip install --upgrade pip
         pip install buildozer cython
 
+    - name: Aceptar licencias de Android SDK
+      run: |
+        mkdir -p /home/runner/.android
+        touch /home/runner/.android/repositories.cfg
+        yes | sudo /usr/lib/jvm/java-17-openjdk-amd64/bin/sdkmanager --licenses || true
+
     - name: Compilar APK
       run: |
         buildozer -v android debug
